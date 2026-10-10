@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>SNTAT - لوحة التحكم</title><style>
+:root{--bg:#eef6f5;--card:#fff;--line:#cfe5e2;--teal:#2a9d93;--orange:#f28a12;--text:#0d3f3b;--sub:#5d8a86;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0b1b1a;--card:#122827;--line:#2f6f69;--text:#d9f2ef;--sub:#86b5b0}}
+:root[data-theme="dark"]{--bg:#0b1b1a;--card:#122827;--line:#2f6f69;--text:#d9f2ef;--sub:#86b5b0}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}*{box-sizing:border-box;margin:0}
+body{background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Tahoma,sans-serif;padding:16px;max-width:1000px;margin:0 auto}
+button,input{font-family:inherit;color:inherit}
+header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}header h1{font-size:20px}header span{color:var(--orange)}
+.g{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:14px}
+.k{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px}.k small{color:var(--sub);font-size:12px}.k b{display:block;font-size:24px;margin-top:4px}
+.p{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:14px}.p h2{font-size:15px;margin-bottom:10px}
+.f{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}.f label{font-size:12px;color:var(--sub);display:block}
+.in{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:9px;font-size:14px;margin-top:4px}
+.b{background:var(--teal);color:#fff;border:0;border-radius:10px;padding:9px 16px;font-size:13px;cursor:pointer}.b.o{background:var(--orange)}.b.x{background:transparent;color:var(--teal);border:1px solid var(--line)}
+.r{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--line);font-size:14px}.r:first-of-type{border-top:0}.r div{flex:1}.r small{color:var(--sub);display:block}
+.ad{display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap}.ad .in{margin:0;flex:1;min-width:110px}
+.n{background:#f28a121f;border:1px solid var(--orange);border-radius:12px;padding:10px;font-size:12px;margin-bottom:14px;line-height:1.6}
+#t{position:fixed;top:calc(12px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);background:#0d3f3b;color:#fff;padding:8px 16px;border-radius:18px;font-size:13px;opacity:0;transition:.3s;pointer-events:none}#t.s{opacity:1}
+.e{color:var(--sub);text-align:center;padding:12px;font-size:13px}
+</style></head><body><div id="t"></div><header><h1>لوحة تحكم <span>SNTAT</span></h1><a class="b x" href="/" style="text-decoration:none">التطبيق</a></header><div id="app"><p class="e">جارٍ التحميل…</p></div><script>
+const $=i=>document.getElementById(i),E=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])),F=n=>Math.floor(n||0).toLocaleString('en-US'),v=i=>$(i).value.trim();
+let ST={},US=[],C={},RM=[],LS=[];
+const T=m=>{const e=$('t');e.textContent=m;e.className='s';clearTimeout(T.h);T.h=setTimeout(()=>e.className='',2000)};
+const api=async(p,b)=>{const r=await fetch('/api/'+p,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b||{})});const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.error||'خطأ');return j};
+const act=async(p,b,m)=>{try{await api(p,b);m&&T(m);await L()}catch(e){T(e.message)}};
+async function L(){try{const[s,u,c]=await Promise.all([api('admin/stats'),api('admin/users'),api('admin/config')]);ST=s;US=u.users;C=c.config;RM=c.rooms;LS=c.listings;draw()}catch(e){$('app').innerHTML='<p class="e">'+E(e.message)+' — <a href="/">سجّل الدخول كأدمن من التطبيق</a></p>'}}
+const save=()=>act('admin/config',{set:{daily_bonus:v('cb'),referral_bonus:v('cf'),points_per_usd:v('cr'),announcement:v('ca'),maintenance:C.maintenance===true}},'تم الحفظ ✅');
+const mt=()=>{C.maintenance=!(C.maintenance===true);save2()};const save2=()=>act('admin/config',{set:{daily_bonus:C.daily_bonus,referral_bonus:C.referral_bonus,points_per_usd:C.points_per_usd,announcement:C.announcement||'',maintenance:C.maintenance}},'تم');
+function draw(){const a=document.activeElement;if(a&&a.id&&a.tagName=='INPUT')return;const k=(l,x)=>`<div class="k"><small>${l}</small><b>${x}</b></div>`,i=(id,l,x,t)=>`<div><label>${l}</label><input class="in" id="${id}" type="${t||'number'}" value="${E(x)}"></div>`;
+$('app').innerHTML=`<div class="g">${k('المستخدمون',ST.users)}${k('نشطون الآن',ST.active)}${k('إجمالي النقاط',F(ST.points))}${k('إجمالي $',(ST.usd_cents/100).toFixed(2))}${k('المحظورون',ST.banned)}</div>
+<div class="p"><h2>الإعدادات العامة</h2><div class="f">${i('cb','المكافأة اليومية',C.daily_bonus)}${i('cf','مكافأة الدعوة',C.referral_bonus)}${i('cr','نقاط لكل $1',C.points_per_usd)}${i('ca','إعلان البانر',C.announcement||'','text')}</div><div class="ad" style="margin-top:12px"><button class="b o" onclick="save()">حفظ</button><button class="b x" onclick="mt()">وضع الصيانة: ${C.maintenance===true?'مفعّل ✅':'متوقف'}</button></div></div>
+<div class="p"><h2>المستخدمون</h2>${US.map(u=>`<div class="r"><div><b>${E(u.name)}</b> ${u.role=='admin'?'🛠':''}<small>${E(u.email)} · ${F(u.points)} نقطة · $${(u.usd_cents/100).toFixed(2)} · حجم ${F(u.counter_size)}</small></div>${u.role=='admin'?'':`<button class="b ${u.banned?'o':'x'}" onclick="act('admin/ban',{id:${u.id},banned:${!u.banned}})">${u.banned?'رفع الحظر':'حظر'}</button>`}</div>`).join('')}</div>
+<div class="p"><h2>الغرف الرسمية</h2><div class="ad"><input class="in" id="ar" placeholder="اسم الغرفة"><button class="b" onclick="act('admin/room',{name:v('ar')})">إضافة</button></div>${RM.map(r=>`<div class="r"><div>${E(r.name)}</div><button class="b x" onclick="act('admin/room',{del:${r.id}})">حذف</button></div>`).join('')}</div>
+<div class="p"><h2>عروض P2P الرسمية</h2><div class="ad"><input class="in" id="lp" type="number" placeholder="النقاط"><input class="in" id="lu" type="number" step="0.1" placeholder="السعر $"><button class="b" onclick="act('admin/listing',{points:v('lp'),usd:v('lu')})">إضافة</button></div>${LS.map(l=>`<div class="r"><div>${F(l.points)} نقطة · $${(l.price_cents/100).toFixed(2)}</div><button class="b x" onclick="act('admin/listing',{del:${l.id}})">حذف</button></div>`).join('')}</div>`}
+L();setInterval(L,30000);
+</script></body></html>
